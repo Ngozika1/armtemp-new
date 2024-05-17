@@ -1,0 +1,73 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {"storageaccount-name": {
+        "type": "string",
+        "metadata": {
+            "description": "enter storage account-name here"
+        }
+    },
+        "name of webapp": {
+            "type": "string",
+            "metadata": {
+                "description": "enter webapp name here"
+            }
+        },
+        "name of app service": {
+            "type": "string",
+            "metadata": {
+                "description": "enter app service name here"
+            }
+        }},
+    "functions": [],
+    "variables": {},
+    "resources": [{
+        "name": "[parameters('storageaccount-name')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2023-01-01",
+        "tags": {
+            "displayName": "[parameters('storageaccount-name')]"
+        },
+        "location": "[resourceGroup().location]",
+        "kind": "StorageV2",
+        "sku": {
+            "name": "Premium_LRS",
+            "tier": "Premium"
+        }
+    },
+        {
+            "name": "[parameters('name of webapp')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2022-09-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/appServicePlan1')]": "Resource",
+                "displayName": "[parameters('name of webapp')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('name of app service'))]"
+            ],
+            "properties": {
+                "name": "[parameters('name of webapp')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('name of app service'))]"
+            }
+        },
+        {
+            "name": "[parameters('name of app service')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2022-09-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+            "tags": {
+                "displayName": "[parameters('name of app service')]"
+            },
+            "properties": {
+                "name": "[parameters('name of app service')]"
+            }
+        }
+        ],
+    "outputs": {}
+}
